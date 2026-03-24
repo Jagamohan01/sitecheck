@@ -4,6 +4,8 @@
     <title>SiteCheck</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
     <style>
         body {
             font-family: Arial;
@@ -87,6 +89,67 @@
             color: #555;
         }
 
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        #fileName {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .button-group {
+            margin-left: auto;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 15px;
+}
+
+.dataTables_wrapper .dataTables_length {
+    margin-right: 20px;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 15px;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+}
+
+.dataTables_wrapper .dataTables_length {
+    float: left;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 8px;
+    padding: 5px;
+}
+
+.dataTables_wrapper select {
+    margin-left: 5px;
+    padding: 5px;
+}
+
+.dataTables_wrapper {
+    margin-top: 25px;
+}
+
         @media (prefers-color-scheme: dark) {
 
             body {
@@ -150,75 +213,82 @@
 
             <br><br>
 
-            <label class="file-upload">
-                Choose File
-                <input type="file" name="file" id="fileInput">
-            </label>
+            <div class="form-row">
+                <label class="file-upload">
+                    Choose File
+                    <input type="file" name="file" id="fileInput">
+                </label>
 
-            <span id="fileName">
-                {% if file_name %}
-                    {{ file_name }}
-                {% else %}
-                    No file chosen
-                {% endif %}
-            </span>
+                <span id="fileName">
+                    {% if file_name %}
+                        {{ file_name }}
+                    {% else %}
+                        No file chosen
+                    {% endif %}
+                </span>
 
-            <br><br>
-
-            <button type="submit">Check</button>
+                <div class="button-group">
+                    <button type="submit">Check</button>
+                </div>
+            </div>
 
         </form>
 
         {% if results %}
 
-            <table>
+            <table id="myTable">
 
-                <tr>
-                    <th>Domain</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Time (s)</th>
-                </tr>
+    <thead>
+        <tr>
+            <th>Domain</th>
+            <th>Status</th>
+            <th>Description</th>
+            <th>Time (s)</th>
+            <th>SSL</th>
+        </tr>
+    </thead>
 
-                {% for r in results %}
+    <tbody>
+        {% for r in results %}
+        <tr>
 
-                    <tr>
+            <td>{{ r.domain }}</td>
 
-                        <td>
-                            {{ r.domain }}
-                        </td>
+            <td class="
+                {% if r.status == 'Success' %}
+                    ok
+                {% elif r.status == 'Redirect' %}
+                    warn
+                {% else %}
+                    fail
+                {% endif %}
+            ">
+                {{ r.status }}
+            </td>
 
-                        <td class="
-                            {% if r.status == 'Success' %}
-                                ok
-                            {% elif r.status == 'Redirect' %}
-                                warn
-                            {% else %}
-                                fail
-                            {% endif %}
-                        ">
-                            {{ r.status }}
-                        </td>
+            <td>{{ r.code }} - {{ r.description }}</td>
 
-                        <td>
-                            {{ r.code }} - {{ r.description }}
-                        </td>
+            <td>{{ r.time }}</td>
 
-                        <td>
-                            {{ r.time }}
-                        </td>
+            <td class="{% if r.ssl == 'Yes' %}ok{% else %}fail{% endif %}">
+                {{ r.ssl }}
+            </td>
 
-                    </tr>
+        </tr>
+        {% endfor %}
+    </tbody>
 
-                {% endfor %}
-
-            </table>
+</table>
 
             <br>
 
-            <a href="/download/">
-                <button>Download Excel</button>
-            </a>
+
+            <div class="button-group">
+                <a href="/download/">
+                    <button>Download Excel</button>
+                </a>
+            </div>
+
 
         {% endif %}
 
@@ -230,6 +300,15 @@
 
         fileInput.addEventListener("change", function () {
             fileName.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#myTable').DataTable();
         });
     </script>
 

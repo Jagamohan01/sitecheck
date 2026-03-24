@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SiteCheck</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #f4f6f8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-size: 16px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #222;
+            color: white;
+        }
+
+        .ok {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .warn {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .fail {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        #fileName {
+            margin-left: 10px;
+            color: #555;
+        }
+
+        @media (prefers-color-scheme: dark) {
+
+            body {
+                background: #121212;
+                color: #e0e0e0;
+            }
+
+            .container {
+                background: #1e1e1e;
+                box-shadow: none;
+            }
+
+            textarea {
+                background: #2a2a2a;
+                color: #fff;
+                border: 1px solid #444;
+            }
+
+            table {
+                color: #ddd;
+            }
+
+            th {
+                background: #333;
+            }
+
+            td {
+                border: 1px solid #444;
+            }
+
+            tr:hover {
+                background-color: #2c2c2c;
+            }
+
+            button {
+                background: #388e3c;
+            }
+
+            button:hover {
+                background: #2e7d32;
+            }
+
+            #fileName {
+                color: #ccc;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>🌐 Site Availability Checker</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <textarea name="domains">
+                {{ domain_input }}
+            </textarea>
+
+            <br><br>
+
+            <label class="file-upload">
+                Choose File
+                <input type="file" name="file" id="fileInput">
+            </label>
+
+            <span id="fileName">
+                {% if file_name %}
+                    {{ file_name }}
+                {% else %}
+                    No file chosen
+                {% endif %}
+            </span>
+
+            <br><br>
+
+            <button type="submit">Check</button>
+
+        </form>
+
+        {% if results %}
+
+            <table>
+
+                <tr>
+                    <th>Domain</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Time (s)</th>
+                </tr>
+
+                {% for r in results %}
+
+                    <tr>
+
+                        <td>
+                            {{ r.domain }}
+                        </td>
+
+                        <td class="
+                            {% if r.status == 'Success' %}
+                                ok
+                            {% elif r.status == 'Redirect' %}
+                                warn
+                            {% else %}
+                                fail
+                            {% endif %}
+                        ">
+                            {{ r.status }}
+                        </td>
+
+                        <td>
+                            {{ r.code }} - {{ r.description }}
+                        </td>
+
+                        <td>
+                            {{ r.time }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </table>
+
+            <br>
+
+            <a href="/download/">
+                <button>Download Excel</button>
+            </a>
+
+        {% endif %}
+
+    </div>
+
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const fileName = document.getElementById("fileName");
+
+        fileInput.addEventListener("change", function () {
+            fileName.textContent = this.files.length > 0 ? this.files[0].name : "No file chosen";
+        });
+    </script>
+
+</body>
+</html>

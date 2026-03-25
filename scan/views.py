@@ -244,6 +244,10 @@ def home(request):
 
         request.session["results"] = results
 
+    if request.method == "GET":
+        request.session.pop("results", None)
+        results = []
+
     return render(request, "home.html", {
         "results": results,
         "domain_input": domain_input,

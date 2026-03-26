@@ -313,3 +313,6 @@ def download_excel(request):
 
     response.write(output.read())
     return response
+
+def ping(request):
+    return HttpResponse("OK")

@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from scan.views import ping
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('scan.urls')),
+    path('ping/', ping),
 ]
